@@ -26,7 +26,7 @@ Jarvis Assistant is a Python-based voice assistant that can perform various task
    pip install -r requirements.txt
    
 3. Set up your secrets_1.py file:
-   python
+   ```python
    senderemail = "your_email@gmail.com"
    epwd = "your_email_password"
    to = "recipient_email@gmail.com"
