@@ -1,4 +1,4 @@
-import pyttsx3 as pt #text data into speech
+import pyttsx3 as pt  # Text-to-speech conversion
 import datetime
 import speech_recognition as sr
 import smtplib
@@ -10,7 +10,6 @@ from time import sleep
 import wikipedia
 import pywhatkit
 from newsapi import NewsApiClient
-import clipboard
 import os
 import pyjokes
 import time as tt
@@ -18,10 +17,6 @@ import string
 import random
 import nltk
 from nltk.tokenize import word_tokenize
-
-
-
-
 
 engine = pt.init()
 
@@ -33,52 +28,36 @@ def getvoices(voice):
     voices = engine.getProperty('voices')
     if voice == 1:
         engine.setProperty('voice', voices[0].id)
-        speak("hello human, i am jarvis, your personal assistant")
+        speak("Hello human, I am Jarvis, your personal assistant.")
     elif voice == 2:
         engine.setProperty('voice', voices[1].id)
-        speak("hello human, i am friday, your personal assistant")
-    
-    
+        speak("Hello human, I am Friday, your personal assistant.")
+
 def time():
     Time = datetime.datetime.now().strftime("%I:%M:%S")
-    speak("the current time is:")
-    speak(Time)
+    speak("The current time is: " + Time)
 
 def date():
-    year = int(datetime.datetime.now().year)
-    month = int(datetime.datetime.now().month)
-    date= int(datetime.datetime.now().day)
-    speak("the current date is:")
-    speak(date)
-    speak(month)
-    speak(year)
+    today = datetime.datetime.now()
+    speak(f"The current date is {today.day} {today.month} {today.year}")
+
 def greeting():
     hour = datetime.datetime.now().hour
-    if hour>=6 and hour <12:
-        speak("Good morning Human")
-    elif hour >= 12 and hour <17:
-        speak("afternoon human")
-    elif hour>=17 and hour < 24:
-        speak("Good evening human")
+    if 6 <= hour < 12:
+        speak("Good morning, human.")
+    elif 12 <= hour < 17:
+        speak("Good afternoon, human.")
+    elif 17 <= hour < 24:
+        speak("Good evening, human.")
     else:
-        speak("good night human")
+        speak("Good night, human.")
+
 def wishme():
-    speak("Welcome Back human!")
+    speak("Welcome back, human!")
     time()
     date()
     greeting()
-    speak("Jaarvis at your service , please tell me how may i help you?")
-    
-#while True:
- #   voice = input("enter 1 for male voice and 2 for female voice \n ")
-  #  speak(audio)
-   # getvoices(voice)
-#time()
-#date()
-
-def takeCommandCMD():
-    query = input("please tell how may i help you?\n")
-    return query
+    speak("Jarvis at your service. Please tell me how may I help you?")
 
 def takeCommandMic():
     r = sr.Recognizer()
@@ -86,214 +65,129 @@ def takeCommandMic():
         print("Listening ...")
         r.pause_threshold = 1
         audio = r.listen(source)
-
     try:
         print("Recognizing...")
-        query = r.recognize_google(audio , language="en-in")
+        query = r.recognize_google(audio, language="en-in")
         print(query)
-    except Exception as e:
-        print(e)
-        speak("please kindly repeat...")
+        return query
+    except Exception:
+        speak("Please kindly repeat...")
         return "None"
-    return query
 
-def sendEmail(content):
-    server = smtplib.SMTP('smtp.gmail.com',587)
+def sendEmail(receiver, subject, content):
+    server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
-    server.login(senderemail,epwd)
+    server.login(senderemail, epwd)
     email = EmailMessage()
-    email['From']= senderemail
-    email['To'] = reciever
-    email['subject']= subject
+    email['From'] = senderemail
+    email['To'] = receiver
+    email['Subject'] = subject
     email.set_content(content)
-    email.send_message(email)
-
+    server.send_message(email)
     server.close()
 
-def send_whatsapp_msg(phone_no,message):
-    Message = message
-    wb.open('https://web.whatsapp.com/send?phone='+phone_no+'&text='+Message)
+def send_whatsapp_msg(phone_no, message):
+    wb.open(f'https://web.whatsapp.com/send?phone={phone_no}&text={message}')
     sleep(10)
     pyautogui.press('enter')
 
 def search_google():
-    speak("what do you want to search?")
+    speak("What do you want to search?")
     search = takeCommandMic()
-    wb.open('https://www.google.com/search?q='+search)
-
+    wb.open(f'https://www.google.com/search?q={search}')
 
 def news():
     newsapi = NewsApiClient(api_key='6a875544e554815878d4e938968bf19')
-    speak=("what do you want to know about?")
-    topic =takeCommandMic()
-    data = newsapi.get_top_headlines(q=topic,language='en',country='in',page_size=  5)
-    newsdata = data['articles']
-    for x,y in enumerate(newsdata):
-        print(f'{x} {y["description"]}')
-        speak(f'{x} {y["description"]}')
-
-    speak("these are the top headlines for today")
+    speak("What do you want to know about?")
+    topic = takeCommandMic()
+    data = newsapi.get_top_headlines(q=topic, language='en', country='in', page_size=5)
+    for i, article in enumerate(data['articles']):
+        speak(f'{i + 1}. {article["description"]}')
+    speak("These are the top headlines for today.")
 
 def text2speech():
-    speak("what do you want me to speak?")
+    speak("What do you want me to speak?")
     text = takeCommandMic()
-    print(text)
     speak(text)
 
 def screenshot():
-    name_img=tt.time()
-    
-    name_img = f'C:\\Users\\tripa\\Desktop\\screenshot\\{name_img}.png'
+    name_img = f'screenshot_{tt.time()}.png'
     img = pyautogui.screenshot(name_img)
     img.show()
 
 def password_generator():
-    s1 = string.ascii_uppercase
-    s2 = string.ascii_lowercase
-    s3 = string.digits
-    s4 = string.punctuation
-
-    passlen = 8
-    s = []
-    s.extend(list(s1))
-    s.extend(list(s2))
-    s.extend(list(s3))
-    s.extend(list(s4))
-
-    random.shuffle(s)
-    newpass = ("".join(s[0:passlen]))
+    chars = string.ascii_letters + string.digits + string.punctuation
+    newpass = ''.join(random.choice(chars) for _ in range(8))
     speak(newpass)
 
 def flip():
-    speak("what do you want to flip? , a coin")
-    coin = ['heads','tails']
-    toss = []
-    toss.extend(coin)
-    random.shuffle(toss)
-    toss = ("".join(toss[0]))
-    speak("i flipped the coin and it is"+toss)
+    speak("Flipping a coin.")
+    speak(random.choice(['Heads', 'Tails']))
 
 def roll_a_die():
-    speak("yes sir rolling the die")
-    die = ['1','2','3','4','5','6']
-    roll=[]
-    roll.extend(die)
-    random.shuffle(roll)
-    roll = ("".join(roll[0]))
-    speak("i rolled the die and it is"+roll)
+    speak("Rolling a die.")
+    speak(random.choice(['1', '2', '3', '4', '5', '6']))
 
-
-    
 if __name__ == "__main__":
-    #getvoices(1)
-    #wishme()
     wakeword = "jarvis"
     while True:
-
         query = takeCommandMic().lower()
         query = word_tokenize(query)
-        print(query)
         if wakeword in query:
             if 'time' in query:
                 time()
             elif 'date' in query:
                 date()
             elif 'email' in query:
-                email_list ={
-                    'test email':xyz@gmail.com
-                }
+                email_list = {'test email': 'xyz@gmail.com'}
                 try:
-                    speak("To whom you want to send email?")
+                    speak("To whom do you want to send an email?")
                     name = takeCommandMic()
-                    reciever = email_list[name]
-                    speak("what is the subject of mail?")
-                    subject=takeCommandMic()
-                    sendEmail(reciever,subject,content)
-                    speak('what should i say?')
-                    content = takeCommandMic()
-                    sendEmail(content)
-                    speak("email has been send")
-                except Exception as e:
-                    print(e)
-                    speak("unable to send email")
-
+                    receiver = email_list.get(name, None)
+                    if receiver:
+                        speak("What is the subject?")
+                        subject = takeCommandMic()
+                        speak("What should I say?")
+                        content = takeCommandMic()
+                        sendEmail(receiver, subject, content)
+                        speak("Email has been sent.")
+                    else:
+                        speak("I couldn't find the recipient.")
+                except Exception:
+                    speak("Unable to send email.")
             elif 'message' in query:
-                user_name = {
-                    'Jarvis' : '+91 9999657854'
-                }
+                user_contacts = {'Jarvis': '+919999657854'}
                 try:
-                    speak("To whom you want to whatsapp message?")
+                    speak("To whom do you want to send a message?")
                     name = takeCommandMic()
-                    phone_no = user_name[name]
-                    speak("what is the message?")
-                    message=takeCommandMic()
-                    send_whatsapp_msg(phone_no,message)
-                    speak('message has been send')
-                    
-                except Exception as e:
-                    print(e)
-                    speak("unable to send message")
-
+                    phone_no = user_contacts.get(name, None)
+                    if phone_no:
+                        speak("What is the message?")
+                        message = takeCommandMic()
+                        send_whatsapp_msg(phone_no, message)
+                        speak("Message has been sent.")
+                    else:
+                        speak("I couldn't find the contact.")
+                except Exception:
+                    speak("Unable to send message.")
             elif 'wikipedia' in query:
-                speak("searching...")
-                query = query.replace("wikipedia","")
-                result = wikipedia.summary(query,sentences=2)
-                print(result)
+                query.remove('wikipedia')
+                result = wikipedia.summary(' '.join(query), sentences=2)
                 speak(result)
-
             elif 'search' in query:
                 search_google()
-
             elif 'youtube' in query:
-                speak("what do you want to search?")
-                search = takeCommandMic()
-                
-                pywhatkit.playonyt(search)
-
+                speak("What do you want to search?")
+                pywhatkit.playonyt(takeCommandMic())
             elif 'news' in query:
                 news()
-
             elif 'read' in query:
                 text2speech()
-
-            elif 'open' in query:
-                os.system('explorer C:\\{}'.format(query.replace('open','')))
-
-            elif 'open code' in query:
-                codePath = "C:\\Users\\tripa\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
-                os.startfile(codePath)
-
-            elif 'joke' in query:
-                speak(pyjokes.get_joke())
-
-            elif 'screenshot' in query:
-                screenshot()
-
-            elif 'remember' in query:
-                speak("what should i remember?")
-                data = takeCommandMic()
-                speak("you said me to remember"+data)
-                remember = open('data.txt','w')
-                remember.write(data)
-                remember.close()
-
-            elif 'do you know anything' in query:
-                remember = open('data.txt','r')
-                speak("you said me to remember that"+remember.read())
-
             elif 'password' in query:
                 password_generator()
-
             elif 'flip' in query:
                 flip()
-
             elif 'roll' in query:
                 roll_a_die()
-            
             elif 'offline' in query:
                 quit()
-
-            else:
-                break
-
-
